@@ -1,23 +1,23 @@
 import matplotlib.pyplot as plt
 
-# Vlažnost drveta i odgovarajuće stanje releja
-vlažnost_drveta = range(0, 101, 5)  # Vlažnost od 0 do 100%, korak 5
-stanje_releja = []
-zeljena_vlaznost = 45  # Pretpostavka: Željena vlažnost drveta
+# Wood humidity and corresponding relay state
+wood_humidity = range(0, 101, 5)  # Humidity from 0 to 100%, step 5
+relay_state = []
+desired_humidity = 45  # Assumption: Desired wood humidity
 
-for v in vlažnost_drveta:
-    if v <= zeljena_vlaznost:
-        stanje_releja.append(0)  
+for h in wood_humidity:
+    if h <= desired_humidity:
+        relay_state.append(0)  
     else:
-        stanje_releja.append(1) 
+        relay_state.append(1) 
 
-# Plotovanje zavisnosti stanja releja od vlažnosti drveta
+# Plot relay state dependency on wood humidity
 plt.figure(figsize=(10, 6))
-plt.plot(vlažnost_drveta, stanje_releja, marker='o', linestyle='-', color='blue', label='Stanje releja')
-plt.axvline(x=zeljena_vlaznost, color='r', linestyle='--', label='Željena vlažnost')
-plt.xlabel('Vlažnost drveta (%)')
-plt.ylabel('Stanje releja')
-plt.title('Zavisnost stanja releja od vlažnosti drveta')
+plt.plot(wood_humidity, relay_state, marker='o', linestyle='-', color='blue', label='Relay state')
+plt.axvline(x=desired_humidity, color='r', linestyle='--', label='Desired humidity')
+plt.xlabel('Wood humidity (%)')
+plt.ylabel('Relay state')
+plt.title('Relay state dependency on wood humidity')
 plt.legend()
 plt.grid(True)
 plt.show()
