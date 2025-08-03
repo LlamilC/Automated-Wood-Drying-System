@@ -8,8 +8,8 @@ from gpiozero import Servo
 
 
 
-temperatura = []
-vlaznost = []
+temperature = []
+humidity = []
 
 
 
@@ -71,19 +71,19 @@ def readLine(line, characters):
         print(characters[3])
     GPIO.output(line, GPIO.LOW)
 
-# Inicijalizacija LCD ekrana
+# Initialize LCD screen
 lcd=I2C_LCD_driver.lcd()
 
 
 
-# Funkcija za prikaz poruke na LCD ekranu
-def prikazi_poruku(poruka,red=1):
+# Function to display message on LCD screen
+def display_message(message,row=1):
     lcd.lcd_clear()
-    lcd.lcd_display_string(poruka,red)
+    lcd.lcd_display_string(message,row)
 
-# Inicijalizacija promenljive za unos šifre
-unesena_sifra = ""
-ispravna_sifra = "333"
+# Initialize variable for password input
+entered_password = ""
+correct_password = "333"
 
 #servo=AngularServo(18,min_pulse_width=0.0006,max_pulse_width=0.0023)
 servo_pin=18
@@ -109,13 +109,13 @@ fan_pwm2=GPIO.PWM(fan_pin2,25000)
 fan_pwm2.start(0)
 
 
-#REleJ
+#RELAY
 GPIO.setup(4,GPIO.OUT)
 GPIO.output(4,GPIO.LOW)
 
 
 
-# Beskonačna petlja za nastavak programa
+# Infinite loop to continue the program
 while True:
     
     
@@ -125,26 +125,26 @@ while True:
    
  
     
-    prikazi_poruku("Unesite sifru1:")
+    display_message("Enter password:")
     
-    # Glavna petlja za unos šifre
-    while len(unesena_sifra) != 3:  # Korisnik treba uneti tačno 3 broja
+    # Main loop for password input
+    while len(entered_password) != 3:  # User needs to enter exactly 3 numbers
         key = keypad.getKey()
         if  key:
-             unesena_sifra += str(key)
-             prikazi_poruku("Unesite sif:" +"*" * len(unesena_sifra))
+             entered_password += str(key)
+             display_message("Enter pass:" +"*" * len(entered_password))
              time.sleep(0.2)
 
-    if unesena_sifra == ispravna_sifra:
-          prikazi_poruku("Sifra je tacna. ")
-          unesena_sifra = ""
+    if entered_password == correct_password:
+          display_message("Password correct.")
+          entered_password = ""
 
         # Display the available options to the user
-          prikazi_poruku("Izaberite opciju:")
+          display_message("Choose option:")
           time.sleep(1.0)  # Sleep for 1 second
             
-          prikazi_poruku("A: Kvalitetno")
-          lcd.lcd_display_string("B:Drvo za ogrev",2)
+          display_message("A: High quality")
+          lcd.lcd_display_string("B:Firewood",2)
         
           time.sleep(1.0)  # Sleep for 1 second
           choice = None
@@ -161,93 +161,93 @@ while True:
                         servo1.ChangeDutyCycle(0)
                         time.sleep(0.3)
                         
-                        prikazi_poruku("Kvalitetno (A)")
+                        display_message("High quality (A)")
                         
                         n=4
                         for i in range(n):
-                            humidity_prostora,temp_prostora= Adafruit_DHT.read_retry(11, 24)
+                            room_humidity,room_temp= Adafruit_DHT.read_retry(11, 24)
                             time.sleep(1.4)
                         
-                        humidity_str1 = f"Humidity: {humidity_prostora:.2f}%"
-                        temperature_str1 = f"Temp: {temp_prostora:.2f}°C"
+                        humidity_str1 = f"Humidity: {room_humidity:.2f}%"
+                        temperature_str1 = f"Temp: {room_temp:.2f}°C"
                         
-                        lcd.lcd_display_string("Temp prostora", 2)
-                        lcd.lcd_display_string("Vlaznost makete", 1)
+                        lcd.lcd_display_string("Room temp", 2)
+                        lcd.lcd_display_string("Model humidity", 1)
                         time.sleep(1.5)
                 
                         lcd.lcd_display_string(temperature_str1, 2)
                         lcd.lcd_display_string(humidity_str1, 1)
                         time.sleep(2)
                             
-                        prikazi_poruku("Ubacite drvo")
+                        display_message("Insert wood")
                         time.sleep(13)
                         
                         
-                        broj_ocitanja = 15
+                        number_of_readings = 15
 
-                        for i in range(broj_ocitanja):
-                            humidity_pocetna, temperature_pocetna = Adafruit_DHT.read_retry(11, 24)
+                        for i in range(number_of_readings):
+                            initial_humidity, initial_temperature = Adafruit_DHT.read_retry(11, 24)
                             time.sleep(2.4)
                         
-                        if(humidity_pocetna > 90):
-                            zeljena_humidity = humidity_pocetna - 37
-                        elif(humidity_pocetna > 85 and humidity_pocetna <=90):
-                            zeljena_humidity = humidity_pocetna - 33
-                        elif(humidity_pocetna > 80 and humidity_pocetna <=85):
-                            zeljena_humidity = humidity_pocetna - 29
-                        elif(humidity_pocetna > 75 and humidity_pocetna <=80):
-                            zeljena_humidity = humidity_pocetna - 25
-                        elif(humidity_pocetna <= 75 and humidity_pocetna > 70):
-                            zeljena_humidity = humidity_pocetna - 20
-                        elif(humidity_pocetna <= 70 and humidity_pocetna > 64):
-                            zeljena_humidity = humidity_pocetna - 17
+                        if(initial_humidity > 90):
+                            desired_humidity = initial_humidity - 37
+                        elif(initial_humidity > 85 and initial_humidity <=90):
+                            desired_humidity = initial_humidity - 33
+                        elif(initial_humidity > 80 and initial_humidity <=85):
+                            desired_humidity = initial_humidity - 29
+                        elif(initial_humidity > 75 and initial_humidity <=80):
+                            desired_humidity = initial_humidity - 25
+                        elif(initial_humidity <= 75 and initial_humidity > 70):
+                            desired_humidity = initial_humidity - 20
+                        elif(initial_humidity <= 70 and initial_humidity > 64):
+                            desired_humidity = initial_humidity - 17
                         else:
-                            zeljena_humidity = humidity_pocetna - 15
+                            desired_humidity = initial_humidity - 15
                             
                             
                              
                         
-                        humidity_str2 = f"Humidity: {humidity_pocetna:.2f}%"
-                        temperature_str2 = f"Temp: {temperature_pocetna:.2f}°C"
+                        humidity_str2 = f"Humidity: {initial_humidity:.2f}%"
+                        temperature_str2 = f"Temp: {initial_temperature:.2f}°C"
                         
-                        lcd.lcd_display_string("Temp drveta", 2)
-                        lcd.lcd_display_string("Vlaznost drveta", 1)
+                        lcd.lcd_display_string("Wood temp", 2)
+                        lcd.lcd_display_string("Wood humidity", 1)
                         time.sleep(1.5)
                 
                         lcd.lcd_display_string(temperature_str2, 2)
                         lcd.lcd_display_string(humidity_str2, 1)
                         
-                        if(humidity_pocetna > humidity_prostora + 5):
+                        if(initial_humidity > room_humidity + 5):
                             duty=10
                             duty2=0
                             
                             while True:
                                 
                                 
-                                humidity, temperature = Adafruit_DHT.read_retry(11, 24)
+                                current_humidity, current_temperature = Adafruit_DHT.read_retry(11, 24)
                                 flag=True
-                                stanjeGrijaca = 0
-                                if temperature >= 31:
+                                heater_state = 0
+                                if current_temperature >= 31:
                                     GPIO.output(4,GPIO.LOW)
-                                    stanjeGrijaca = 0
-                                if (temperature < 31 ):
+                                    heater_state = 0
+                                if (current_temperature < 31 ):
                                     GPIO.output(4,GPIO.HIGH)
-                                    stanjeGrijaca = 1
+                                    heater_state = 1
                                     #fan_pwm.ChangeDutyCycle(20)
                                     #fan_pwm2.ChangeDutyCycle(15)
                        
                                 time.sleep(0.2)
-                                vlaznost.append(humidity)
-                                temperatura.append(temperature)
+                                humidity.append(current_humidity)
+                                temperature.append(current_temperature)
                                 
-                                str_1 = f"H:{int(humidity)}% T:{int(temperature)}°C S:0 "
-                                str_2 = f"V:{duty}% G:{stanjeGrijaca} V2:{duty2}%  "
+                                str_1 = f"H:{int(current_humidity)}% T:{int(current_temperature)}°C S:0 "
+                                str_2 = f"F:{duty}% H:{heater_state} F2:{duty2}%  "
                                 lcd.lcd_clear()
                                 lcd.lcd_display_string(str_2, 2)
                                 lcd.lcd_display_string(str_1, 1)
                                     
                                     
-                                if temperature <= 28 and temperature > 25 :
+                                if current_temperature <= 28 and current_temperature > 25 :
                                     if(duty >= 100 or duty2 >= 100 ):
                                         fan_pwm.ChangeDutyCycle(100)
                                         fan_pwm2.ChangeDutyCycle(100)
@@ -262,7 +262,7 @@ while True:
                                         duty2=duty2 + 2
                                         print(duty)
                                      
-                                elif temperature <= 31 and temperature > 28  :
+                                elif current_temperature <= 31 and current_temperature > 28  :
                                     if(duty >= 100 or duty2 >=100):
                                         fan_pwm.ChangeDutyCycle(100)
                                         fan_pwm2.ChangeDutyCycle(100)
@@ -288,18 +288,18 @@ while True:
                                
                                 
                                 
-                                if humidity <= zeljena_humidity and temp_prostora <26:
-                                    if temperature >= 27:
+                                if current_humidity <= desired_humidity and room_temp <26:
+                                    if current_temperature >= 27:
                                         break
-                                if humidity <= zeljena_humidity and temp_prostora >= 26:
-                                    if temperature >= temp_prostora+1 :
+                                if current_humidity <= desired_humidity and room_temp >= 26:
+                                    if current_temperature >= room_temp+1 :
                                         break
                             duty = 100
                             duty2 = 100
-                            humidity, temperature = Adafruit_DHT.read_retry(11, 24)
+                            final_humidity, final_temperature = Adafruit_DHT.read_retry(11, 24)
                             time.sleep(1)
                             GPIO.output(4,GPIO.LOW)
-                            stanjeGrijaca = 0
+                            heater_state = 0
                             servo1.ChangeDutyCycle(6)
                             time.sleep(0.5)
                             servo1.ChangeDutyCycle(0)
@@ -307,17 +307,17 @@ while True:
                             fan_pwm.ChangeDutyCycle(duty)
                             fan_pwm2.ChangeDutyCycle(duty2)
                             
-                            str_1 = f"H:{int(humidity)}% T:{int(temperature)}°C S:1 "
-                            str_2 = f"V:{duty}% G:{stanjeGrijaca} V2:{duty2}% "
+                            str_1 = f"H:{int(final_humidity)}% T:{int(final_temperature)}°C S:1 "
+                            str_2 = f"F:{duty}% H:{heater_state} F2:{duty2}% "
                             lcd.lcd_clear() 
                             lcd.lcd_display_string(str_2, 2)
                             lcd.lcd_display_string(str_1, 1)
                             time.sleep(3)
                             lcd.lcd_clear()
-                            lcd.lcd_display_string("Ispustanje ", 1)
-                            lcd.lcd_display_string("Toplote", 2)
+                            lcd.lcd_display_string("Heat release", 1)
+                            lcd.lcd_display_string("", 2)
                             time.sleep(40)
-                            humidity, temperature = Adafruit_DHT.read_retry(11, 24)
+                            end_humidity, end_temperature = Adafruit_DHT.read_retry(11, 24)
                             
                             lcd.lcd_clear()
                             duty = 0
@@ -325,31 +325,31 @@ while True:
                             fan_pwm.ChangeDutyCycle(duty)
                             fan_pwm2.ChangeDutyCycle(duty2)
                             
-                            str_1 = f"H:{int(humidity)}% T:{int(temperature)}°C S:1 "
-                            str_2 = f"V:{duty}% G:{stanjeGrijaca} V2:{duty2}% "
+                            str_1 = f"H:{int(end_humidity)}% T:{int(end_temperature)}°C S:1 "
+                            str_2 = f"F:{duty}% H:{heater_state} F2:{duty2}% "
                 
                             lcd.lcd_display_string(str_2, 2)
                             lcd.lcd_display_string(str_1, 1)
                             time.sleep(3)
                             
                             
-                            with open ('podaci.txt' ,'w') as file:
-                                for temp,hum in zip (temperatura,vlaznost):
+                            with open ('data.txt' ,'w') as file:
+                                for temp,hum in zip (temperature,humidity):
                                     file.write(f"{temp},{hum}\n")
                         
                        
                         else:
-                            prikazi_poruku("Drvo je suho",1)
+                            display_message("Wood is dry",1)
                             time.sleep(2.8)
                             
                     elif choice == 'B':
-                        prikazi_poruku("Drvo za ogrev (B)")
+                        display_message("Firewood (B)")
                         time.sleep(1.8)
            
       # Here you can add your code to continue the program.
     else:
-        prikazi_poruku("Sifra je netacna.")
-        unesena_sifra = ""
+        display_message("Password incorrect.")
+        entered_password = ""
         time.sleep(0.6)  # Sleep for 0.6 seconds
 
     #servo1.stop()
